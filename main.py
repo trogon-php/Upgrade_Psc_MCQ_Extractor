@@ -118,7 +118,6 @@ async def upload_file( background_tasks: BackgroundTasks, customInput: str = For
         "json_filepath": json_file_path,
         "status":"Processing",
         "upload_timestamp": datetime.utcnow().isoformat() + "Z",
-        "userId": "demoUser123"
     }
     save_metadata(metadata)
 
