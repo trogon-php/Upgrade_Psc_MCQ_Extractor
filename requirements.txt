@@ -4,3 +4,4 @@ python-dotenv
 google-generativeai
 uuid
 uvicorn
+python-multipart
