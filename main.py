@@ -32,10 +32,9 @@ def process_file(file_path: str, result_file_name: str, uuid: str, customInput: 
    
 
     # Write some result file after processing finishes
-   # final_json = json.dumps(questions, indent=2, ensure_ascii=False)
-   # with open("Outputs/"+result_file_name, "w", encoding='utf-8') as f:
-   #    f.write(final_json)
-   final_json=json.dumps(questions, indent=2, ensure_ascii=False)
+   final_json = json.dumps(questions, indent=2, ensure_ascii=False)
+   with open("Outputs/"+result_file_name, "w", encoding='utf-8') as f:
+      f.write(final_json)
    print(final_json)
 
    print(f"Processing done, result saved as {result_file_name}")
