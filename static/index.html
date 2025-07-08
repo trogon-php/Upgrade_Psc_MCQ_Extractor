@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Upload PDF</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border: none;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+    }
+
+    form {
+      background-color: #fff;
+      padding: 40px 30px;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      text-align: center;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 24px;
+      color: #333;
+    }
+
+    .upload-label {
+      display: inline-block;
+      background-color: #f1f1f1;
+      border: 2px dashed #ccc;
+      border-radius: 10px;
+      padding: 30px 20px;
+      cursor: pointer;
+      transition: 0.3s;
+      width: 100%;
+    }
+
+    .upload-label:hover {
+      border-color: #4CAF50;
+      background-color: #f1fff3;
+    }
+
+    .upload-icon {
+      width: 40px;
+      height: 40px;
+      fill: #4CAF50;
+      margin-bottom: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .upload-label span {
+      display: block;
+      color: #555;
+      font-size: 16px;
+      margin-top: 5px;
+    }
+
+    #fileInput {
+      display: none;
+    }
+
+    .file-name {
+      margin-top: 10px;
+      font-size: 24px;
+      color: #9d5858;
+      word-break: break-word;
+    }
+
+    button {
+      background-color: #4CAF50;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+      width: 100%;
+      margin-top: 20px;
+    }
+
+    button:hover {
+      background-color: #45a049;
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+  </style>
+</head>
+<body>
+  <form action="/upload" method="post" enctype="multipart/form-data">
+    <h1>Upload PDF for MCQ Extraction</h1>
+
+    <input type="file" id="fileInput" name="file" accept="application/pdf" required />
+
+    <label for="fileInput" class="upload-label" id="uploadLabel">
+      <span id="uploadText">Click to upload PDF</span>
+      <div class="file-name" id="fileName"></div>
+    </label>
+
+    <input type="text" name="customInput" id="customInput" placeholder="Enter your instructions">
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const uploadText = document.getElementById('uploadText');
+    const fileName = document.getElementById('fileName');
+    const customInput = document.getElementById('customInput');
+
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files.length > 0) {
+        const selectedFile = fileInput.files[0];
+
+  
+
+        // Update text and show filename
+        uploadText.textContent = "";
+        fileName.textContent = selectedFile.name;
+      } else {
+        // Reset to default if file is deselected
+        uploadIcon.innerHTML = `<path d="M5 20h14v-2H5v2zm7-18l-6 6h4v6h4v-6h4l-6-6z"/>`;
+        uploadText.textContent = "Click to upload PDF";
+        fileName.textContent = "";
+      }
+    });
+  </script>
+</body>
+</html>
