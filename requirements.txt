@@ -3,3 +3,4 @@ pdfplumber
 python-dotenv
 google-generativeai
 uuid
+uvicorn
