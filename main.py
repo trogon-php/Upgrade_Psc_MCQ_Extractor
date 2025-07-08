@@ -22,7 +22,7 @@ def process_file(file_path: str, result_file_name: str, uuid: str, customInput: 
     # Simulate a time-consuming task
    processor = MCQBatchProcessor(api_key)
    questions = processor.process_pdf_in_batches(file_path, customInput)
-   
+
 
    if questions == []:
       print("No questions found ")
@@ -33,9 +33,8 @@ def process_file(file_path: str, result_file_name: str, uuid: str, customInput: 
 
     # Write some result file after processing finishes
    final_json = json.dumps(questions, indent=2, ensure_ascii=False)
-   with open("Outputs/"+result_file_name, "w", encoding='utf-8') as f:
+   with open(result_file_name, "w", encoding='utf-8') as f:
       f.write(final_json)
-   print(final_json)
 
    print(f"Processing done, result saved as {result_file_name}")
    update_metadata(uuid, "Processed")
@@ -110,13 +109,13 @@ async def upload_file( background_tasks: BackgroundTasks, customInput: str = For
     with open(file_location, 'wb') as buffer:
         buffer.write(file.file.read())
 
-    json_file_name = unique_id+".json"
+    json_file_path = os.path.join(os.path.dirname(__file__)+"/Outputs/"+unique_id+".json")
 
     metadata = {
         "uuid": unique_id,
         "original_filename": file.filename,
-        "pdf_filename": file_name,
-        "json_filename": json_file_name,
+        "pdf_filepath": file_location,
+        "json_filepath": json_file_path,
         "status":"Processing",
         "upload_timestamp": datetime.utcnow().isoformat() + "Z",
         "userId": "demoUser123"
@@ -124,7 +123,7 @@ async def upload_file( background_tasks: BackgroundTasks, customInput: str = For
     save_metadata(metadata)
 
     print("Before adding background task")
-    background_tasks.add_task(process_file, file_location, json_file_name, unique_id, customInput)
+    background_tasks.add_task(process_file, file_location, json_file_path, unique_id, customInput)
     print("After adding background task")
 
     return RedirectResponse(url=f"""metadata/{unique_id}""",status_code=302)
@@ -136,4 +135,16 @@ async def get_status(uuid: str):
     metadata = next((item for item in metadata_list if item["uuid"] == uuid), None)
     if not metadata:
         raise HTTPException(status_code=404, detail="Metadata not found")
+
     return JSONResponse(content={'message': 'File Uplaoded Succesfully', 'metadata': metadata}, status_code=200)
+
+@app.get("/json/{uuid}")
+async def get_json(uuid:str):
+   print("getting json srting for uuid :" ,uuid)
+   metadata_list=load_metadata()
+   metadata = next((item for item in metadata_list if item["uuid"] == uuid), None)
+
+   with open(metadata["json_filepath"], "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+   return JSONResponse(content=data)
