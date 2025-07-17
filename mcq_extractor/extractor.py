@@ -6,7 +6,7 @@ import google.generativeai as genai
 class MCQExtractor:
     def __init__(self, api_key):
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel("gemini-2.5-flash")
+        self.model = genai.GenerativeModel("gemini-2.5-pro")
         
     
     def extract_mcqs(self, batch_text,questions_to_ignore,custom_prompt,attempt=0):
