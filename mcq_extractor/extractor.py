@@ -34,6 +34,7 @@ class MCQExtractor:
       
       Note:
       - Correct any spelling or grammar issues in the extracted questions or statements based on context.
+      - Ensure Proper Unicode fonts.
       - Ensure the output is a valid JSON array and properly structured.
       - Create questions or options (max 4), and statements - if contextually applicable and the chances to be created in the next or previous batches is lower (context is much higher in this batch)
       - if any questions happen to repeat , ignore it , (only ignore the questions with same purpose, not similar)
