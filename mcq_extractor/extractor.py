@@ -24,7 +24,7 @@ class MCQExtractor:
          - If there are any statements (e.g., Statement I, II, etc.), include them inside the same HTML block with appropriate formatting.
          - If the question is a 'Match-the-Column' type, include both List I and List II inside the HTML, using `<ul>`, `<li>`, or `<table>` as needed.
       - "options": An array of strings, where each string is an option (e.g., [" Option 1", " Option 2"]).
-      - "correct_answer": The option number or identifier of the correct option (e.g., 3), if provided in the answer key or add according to question.
+      - "correct_answer": The option number or identifier of the correct option (e.g., 3), if provided in the answer key or Generate according to question.
       - "type": One of ['MCQ', 'Order-based', 'Match-the-Column'].
       
       Important formatting notes:
