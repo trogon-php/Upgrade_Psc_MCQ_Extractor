@@ -135,7 +135,7 @@ async def get_status(uuid: str):
     if not metadata:
         raise HTTPException(status_code=404, detail="Metadata not found")
 
-    return JSONResponse(content={'message': 'File Uplaoded Succesfully', 'metadata': metadata}, status_code=200)
+    return JSONResponse(content={'message': 'File Uploaded Succesfully', 'metadata': metadata}, status_code=200)
 
 @app.get("/json/{uuid}")
 async def get_json(uuid:str):
