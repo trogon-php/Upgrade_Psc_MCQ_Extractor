@@ -143,7 +143,12 @@ async def get_json(uuid:str):
    metadata_list=load_metadata()
    metadata = next((item for item in metadata_list if item["uuid"] == uuid), None)
 
-   with open(metadata["json_filepath"], "r", encoding="utf-8") as f:
+   # Ensures if file exists, status == prcessed.
+   if not os.path.isfile(metadata["json_filename"]):
+        print(f"❌ File not found: {metadata["json_filename"]}")
+        return JSONResponse(content={"status":0,"data":[]})
+
+   with open(metadata["json_filename"], "r", encoding="utf-8") as f:
         data = json.load(f)
 
-   return JSONResponse(content=data)
+   return JSONResponse(content={"status":1,"data":data})
