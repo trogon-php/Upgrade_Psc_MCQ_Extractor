@@ -144,15 +144,15 @@ async def get_json(uuid:str):
    metadata = next((item for item in metadata_list if item["uuid"] == uuid), None)
 
    # Ensuring the metadata is available.
-    if not metadata:
-        return JSONResponse(content={"status":0,"message":"Metadata not found","metadata":[]},status_code=200)
+   if not metadata:
+      return JSONResponse(content={"status":0,"message":"Metadata not found","metadata":[]},status_code=200)
        
    # Ensure the file exists
-    if not os.path.isfile(metadata["json_filepath"]):
-        print(f"❌ File not found: {metadata["json_filepath"]}")
-        return JSONResponse(content={"status":0,"message":"File not found","data":[]},status_code=200)
+   if not os.path.isfile(metadata["json_filepath"]):
+      print(f"❌ File not found: {metadata["json_filepath"]}")
+      return JSONResponse(content={"status":0,"message":"File not found","data":[]},status_code=200)
 
-    with open(metadata["json_filepath"], "r", encoding="utf-8") as f:
-        data = json.load(f)
+   with open(metadata["json_filepath"], "r", encoding="utf-8") as f:
+      data = json.load(f)
 
-    return JSONResponse(content={"status":1,'message': 'File Processed Succesfully',"data":data},status_code=200)
+   return JSONResponse(content={"status":1,'message': 'File Processed Succesfully',"data":data},status_code=200)
