@@ -133,9 +133,9 @@ async def get_status(uuid: str):
     metadata_list = load_metadata()
     metadata = next((item for item in metadata_list if item["uuid"] == uuid), None)
     if not metadata:
-        raise HTTPException(status_code=404, detail="Metadata not found")
+        return JSONResponse(content={"status":0,"message":"Metadata not found","metadata":[]},status_code=200)
 
-    return JSONResponse(content={'message': 'File Uploaded Succesfully', 'metadata': metadata}, status_code=200)
+    return JSONResponse(content={"status":1,'message': 'File Uploaded Succesfully', 'metadata': metadata}, status_code=200)
 
 @app.get("/json/{uuid}")
 async def get_json(uuid:str):
@@ -144,15 +144,15 @@ async def get_json(uuid:str):
    metadata = next((item for item in metadata_list if item["uuid"] == uuid), None)
 
    # Ensuring the metadata is available.
-   if not metadata:
-        raise HTTPException(status_code=404, detail="Metadata not found")
+    if not metadata:
+        return JSONResponse(content={"status":0,"message":"Metadata not found","metadata":[]},status_code=200)
+       
+   # Ensure the file exists
+    if not os.path.isfile(metadata["json_filepath"]):
+        print(f"❌ File not found: {metadata["json_filepath"]}")
+        return JSONResponse(content={"status":0,"message":"File not found","data":[]},status_code=200)
 
-   # Ensures if file exists, status == prcessed.
-   if not os.path.isfile(metadata["json_filename"]):
-        print(f"❌ File not found: {metadata["json_filename"]}")
-        return JSONResponse(content={"status":0,"data":[]})
-
-   with open(metadata["json_filename"], "r", encoding="utf-8") as f:
+    with open(metadata["json_filepath"], "r", encoding="utf-8") as f:
         data = json.load(f)
 
-   return JSONResponse(content={"status":1,"data":data})
+    return JSONResponse(content={"status":1,'message': 'File Processed Succesfully',"data":data},status_code=200)
