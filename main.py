@@ -143,6 +143,10 @@ async def get_json(uuid:str):
    metadata_list=load_metadata()
    metadata = next((item for item in metadata_list if item["uuid"] == uuid), None)
 
+   # Ensuring the metadata is available.
+   if not metadata:
+        raise HTTPException(status_code=404, detail="Metadata not found")
+
    # Ensures if file exists, status == prcessed.
    if not os.path.isfile(metadata["json_filename"]):
         print(f"❌ File not found: {metadata["json_filename"]}")
