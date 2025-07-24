@@ -7,18 +7,18 @@ import uuid
 from datetime import datetime
 import json 
 from dotenv import load_dotenv
+from cleanup import cleanup_files
 
 app = FastAPI()
 load_dotenv()
 api_key = os.getenv("API_KEY")
 
-
 ########################################## CALLING CONVERSION FUNCTION ##########################################
 # function for the conversion process call 
 def process_file(file_path: str, result_file_name: str, uuid: str, customInput: str):
    if not os.path.isfile(file_path):
-    print(f"❌ File not found: {file_path}")
-    # return
+      print(f"❌ File not found: {file_path}")
+    
     # Simulate a time-consuming task
    processor = MCQBatchProcessor(api_key)
    questions = processor.process_pdf_in_batches(file_path, customInput)
@@ -27,8 +27,6 @@ def process_file(file_path: str, result_file_name: str, uuid: str, customInput: 
    if questions == []:
       print("No questions found ")
       update_metadata(uuid, "Processed , No questions found")
-    #   return JSONResponse(content={"message": "No questions found"}, status_code=200)
-
    
 
     # Write some result file after processing finishes
@@ -38,8 +36,9 @@ def process_file(file_path: str, result_file_name: str, uuid: str, customInput: 
 
    print(f"Processing done, result saved as {result_file_name}")
    update_metadata(uuid, "Processed")
-#    return JSONResponse(content={"message": "Processing done, result saved as {result_file_name}"}, status_code=200)
 
+    # finally delete the file from the temporary storage
+    os.remove(file_path)
 
 ########################################## UPDATE METADATA ##########################################
 def update_metadata(uuid: str, status: str):
@@ -59,7 +58,7 @@ def update_metadata(uuid: str, status: str):
 
 ########################################## SAVING METADATA ##########################################
 def save_metadata(metadata):
-    print("hello")
+    print("SAVING")
     try:
         with open("metadata/metadata_list.json", "r") as f:
             existing_data = json.load(f)
@@ -103,6 +102,9 @@ async def serve_index():
 ########################################## Upload file ##########################################
 @app.post('/upload')
 async def upload_file( background_tasks: BackgroundTasks, customInput: str = Form(...), file: UploadFile = File(...) ):
+    # clean files older than 24 hours
+    cleanup_files()
+
     unique_id = str(uuid.uuid4())
     file_name = unique_id+".pdf"
     file_location = os.path.join(uploadSave_Directory, file_name ) # file.filename is the name of the file , name is taken from the temporary storage of UploadFile
@@ -117,7 +119,7 @@ async def upload_file( background_tasks: BackgroundTasks, customInput: str = For
         "pdf_filepath": file_location,
         "json_filepath": json_file_path,
         "status":"Processing",
-        "upload_timestamp": datetime.utcnow().isoformat() + "Z",
+        "upload_timestamp": datetime.now().astimezone().isoformat()
     }
     save_metadata(metadata)
 
@@ -135,7 +137,9 @@ async def get_status(uuid: str):
     if not metadata:
         return JSONResponse(content={"status":0,"message":"Metadata not found","metadata":[]},status_code=200)
 
-    return JSONResponse(content={"status":1,'message': 'File Uploaded Succesfully', 'metadata': metadata}, status_code=200)
+    if metadata["status"] == "Processing":
+        return JSONResponse(content={"status":0,"message":"Processing in progress","metadata":metadata},status_code=200)
+    return JSONResponse(content={"status":1,'message': 'File Processed Succesfully', 'metadata': metadata}, status_code=200)
 
 @app.get("/json/{uuid}")
 async def get_json(uuid:str):
@@ -143,11 +147,12 @@ async def get_json(uuid:str):
    metadata_list=load_metadata()
    metadata = next((item for item in metadata_list if item["uuid"] == uuid), None)
 
-   # Ensuring the metadata is available.
    if not metadata:
       return JSONResponse(content={"status":0,"message":"Metadata not found","metadata":[]},status_code=200)
-       
-   # Ensure the file exists
+
+   # Check if the file exists
+   if metadata["status"] == "Processing":
+      return JSONResponse(content={"status":0,"message":"Processing in progress","data":[]},status_code=200)
    if not os.path.isfile(metadata["json_filepath"]):
       print(f"❌ File not found: {metadata["json_filepath"]}")
       return JSONResponse(content={"status":0,"message":"File not found","data":[]},status_code=200)
