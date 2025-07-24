@@ -7,10 +7,10 @@ class MCQBatchProcessor:
     def __init__(self, api_key):
         self.extractor = MCQExtractor(api_key)
         self.pages_per_batch = 15
-        self.max_chars_per_batch = 15000  # Adjust based on token limits
-        self.max_questions_to_ignore = 10  # Conservative limit to avoid token overload
+        self.max_chars_per_batch = 20000  
+        self.max_questions_to_ignore = 10
         
-    def match_patterns(self, text):
+    def match_patterns(self, text): # to count the question numbers for checking number of questions in the batch
         patterns = [
             r'^\d+\.\s*(.+?)$',                 # 1. Question text
             r'^Q\d+[.:]?\s*(.+?)$',             # Q1: or Q1. Question text
@@ -37,7 +37,7 @@ class MCQBatchProcessor:
         return question_count
     
     def create_page_based_batches(self, pdf_path):
-        """Create batches based on pages (5 pages per batch) without overlap"""
+
         print("Creating page-based batches...")
         
         batches = []
@@ -49,7 +49,7 @@ class MCQBatchProcessor:
             # Create batches of pages without overlap
             for i in range(0, total_pages, self.pages_per_batch):
                 batch_start_page = i
-               #  batch_start_page = max(0, i - 1) if i > 0 else 0
+
                 batch_end_page = min(i + self.pages_per_batch, total_pages)
                 
                 # Extract text from pages in this batch
@@ -112,7 +112,7 @@ class MCQBatchProcessor:
                 print("No questions found in this batch, skipping...")
                 continue
             
-            # Check if batch is too large #############################
+            # Check if batch is too large -- this is a warning, not an error / probably need to change pages_per_batch if tokens are too high
             if batch['char_count'] > self.max_chars_per_batch:
                 print(f"Warning: Batch {batch['batch_number']} is large ({batch['char_count']} chars). "
                       f"Consider reducing pages_per_batch.")
@@ -146,6 +146,6 @@ class MCQBatchProcessor:
         # Renumber questions sequentially
         for i, question in enumerate(all_extracted_questions):
             question['SI.No'] = i + 1
-        
+
         print(f"\nTotal questions extracted: {len(all_extracted_questions)}")
         return all_extracted_questions
