@@ -20,22 +20,22 @@ def process_file(file_path: str, result_file_name: str, uuid: str, customInput: 
       print(f"❌ File not found: {file_path}")
     
     # Simulate a time-consuming task
-   processor = MCQBatchProcessor(api_key)
-   questions = processor.process_pdf_in_batches(file_path, customInput)
+    processor = MCQBatchProcessor(api_key)
+    questions = processor.process_pdf_in_batches(file_path, customInput)
 
 
-   if questions == []:
-      print("No questions found ")
-      update_metadata(uuid, "Processed , No questions found")
+    if questions == []:
+        print("No questions found ")
+        update_metadata(uuid, "Processed , No questions found")
    
 
     # Write some result file after processing finishes
-   final_json = json.dumps(questions, indent=2, ensure_ascii=False)
-   with open(result_file_name, "w", encoding='utf-8') as f:
-      f.write(final_json)
+    final_json = json.dumps(questions, indent=2, ensure_ascii=False)
+    with open(result_file_name, "w", encoding='utf-8') as f:
+        f.write(final_json)
 
-   print(f"Processing done, result saved as {result_file_name}")
-   update_metadata(uuid, "Processed")
+    print(f"Processing done, result saved as {result_file_name}")
+    update_metadata(uuid, "Processed")
 
     # finally delete the file from the temporary storage
     os.remove(file_path)
