@@ -16,8 +16,8 @@ api_key = os.getenv("API_KEY")
 ########################################## CALLING CONVERSION FUNCTION ##########################################
 # function for the conversion process call 
 def process_file(file_path: str, result_file_name: str, uuid: str, customInput: str):
-   if not os.path.isfile(file_path):
-      print(f"❌ File not found: {file_path}")
+    if not os.path.isfile(file_path):
+       print(f"❌ File not found: {file_path}")
     
     # Simulate a time-consuming task
     processor = MCQBatchProcessor(api_key)
