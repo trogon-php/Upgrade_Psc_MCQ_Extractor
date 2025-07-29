@@ -25,9 +25,8 @@ def cleanup_files(max_age_hours=30):
                 if uploadedAt <= cutoff_time:
                     # Delete JSON file
                     os.unlink(json_path)
-                    
-                files_to_remove.append(metadata["uuid"])
-                print(f"Deleted files for job: {metadata['uuid']}")
+                    files_to_remove.append(metadata["uuid"])
+                    print(f"Deleted files for job: {metadata['uuid']}")
                     
             except Exception as e:
                 print(f"Error processing {metadata.get('uuid', 'unknown')}: {e}")
