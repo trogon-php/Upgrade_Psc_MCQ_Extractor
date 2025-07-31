@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 import os
 from mcq_extractor.batch_processor import MCQBatchProcessor
 import uuid
-from datetime import datetime
+from datetime import datetime , timezone
 import json 
 from dotenv import load_dotenv
 from cleanup import cleanup_files
@@ -13,21 +13,22 @@ app = FastAPI()
 load_dotenv()
 api_key = os.getenv("API_KEY")
 
+
 ########################################## CALLING CONVERSION FUNCTION ##########################################
 # function for the conversion process call 
 def process_file(file_path: str, result_file_name: str, uuid: str, customInput: str):
     if not os.path.isfile(file_path):
-       print(f"❌ File not found: {file_path}")
+        print(f"❌ File not found: {file_path}")
     
     # Simulate a time-consuming task
     processor = MCQBatchProcessor(api_key)
     questions = processor.process_pdf_in_batches(file_path, customInput)
-
+   
 
     if questions == []:
         print("No questions found ")
         update_metadata(uuid, "Processed , No questions found")
-   
+    
 
     # Write some result file after processing finishes
     final_json = json.dumps(questions, indent=2, ensure_ascii=False)
@@ -36,7 +37,7 @@ def process_file(file_path: str, result_file_name: str, uuid: str, customInput: 
 
     print(f"Processing done, result saved as {result_file_name}")
     update_metadata(uuid, "Processed")
-
+#   
     # finally delete the file from the temporary storage
     os.remove(file_path)
 
@@ -111,20 +112,20 @@ async def upload_file( background_tasks: BackgroundTasks, customInput: str = For
     with open(file_location, 'wb') as buffer:
         buffer.write(file.file.read())
 
-    json_file_path = os.path.join(os.path.dirname(__file__)+"/Outputs/"+unique_id+".json")
+    json_file_name = os.path.join(os.path.dirname(__file__)+"/Outputs/"+unique_id+".json")
 
     metadata = {
         "uuid": unique_id,
         "original_filename": file.filename,
-        "pdf_filepath": file_location,
-        "json_filepath": json_file_path,
+        "pdf_filename": file_name,
+        "json_filename": json_file_name,
         "status":"Processing",
-        "upload_timestamp": datetime.now().astimezone().isoformat()
+        "upload_timestamp":  datetime.now().astimezone().isoformat()
     }
     save_metadata(metadata)
 
     print("Before adding background task")
-    background_tasks.add_task(process_file, file_location, json_file_path, unique_id, customInput)
+    background_tasks.add_task(process_file, file_location, json_file_name, unique_id, customInput)
     print("After adding background task")
 
     return RedirectResponse(url=f"""metadata/{unique_id}""",status_code=302)
@@ -139,25 +140,25 @@ async def get_status(uuid: str):
 
     if metadata["status"] == "Processing":
         return JSONResponse(content={"status":0,"message":"Processing in progress","metadata":metadata},status_code=200)
-    return JSONResponse(content={"status":1,'message': 'File Processed Succesfully', 'metadata': metadata}, status_code=200)
+    return JSONResponse(content={"status":1,'message': 'File Proccessed Succesfully', 'metadata': metadata}, status_code=200)
 
 @app.get("/json/{uuid}")
 async def get_json(uuid:str):
-   print("getting json srting for uuid :" ,uuid)
-   metadata_list=load_metadata()
-   metadata = next((item for item in metadata_list if item["uuid"] == uuid), None)
+    print("getting json data for uuid :" ,uuid)
+    metadata_list=load_metadata()
+    metadata = next((item for item in metadata_list if item["uuid"] == uuid), None)
 
-   if not metadata:
-      return JSONResponse(content={"status":0,"message":"Metadata not found","metadata":[]},status_code=200)
+    if not metadata:
+        return JSONResponse(content={"status":0,"message":"Metadata not found","metadata":[]},status_code=200)
 
-   # Check if the file exists
-   if metadata["status"] == "Processing":
-      return JSONResponse(content={"status":0,"message":"Processing in progress","data":[]},status_code=200)
-   if not os.path.isfile(metadata["json_filepath"]):
-      print(f"❌ File not found: {metadata["json_filepath"]}")
-      return JSONResponse(content={"status":0,"message":"File not found","data":[]},status_code=200)
+    # Check if the file exists
+    if metadata["status"] == "Processing":
+        return JSONResponse(content={"status":0,"message":"Processing in progress","data":[]},status_code=200)
+    if not os.path.isfile(metadata["json_filename"]):
+        print(f"❌ File not found: {metadata["json_filename"]}")
+        return JSONResponse(content={"status":0,"message":"File not found","data":[]},status_code=200)
+    
+    with open(metadata["json_filename"], "r", encoding="utf-8") as f:
+        data = json.load(f)
 
-   with open(metadata["json_filepath"], "r", encoding="utf-8") as f:
-      data = json.load(f)
-
-   return JSONResponse(content={"status":1,'message': 'File Processed Succesfully',"data":data},status_code=200)
+    return JSONResponse(content={"status":1,'message': 'File Processed Succesfully',"data":data},status_code=200)
