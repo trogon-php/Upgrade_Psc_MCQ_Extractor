@@ -17,8 +17,6 @@ api_key = os.getenv("API_KEY")
 ########################################## CALLING CONVERSION FUNCTION ##########################################
 # function for the conversion process call 
 def process_file(file_path: str, result_file_name: str, uuid: str, customInput: str):
-    if not os.path.isfile(file_path):
-        print(f"❌ File not found: {file_path}")
     
     # Simulate a time-consuming task
     processor = MCQBatchProcessor(api_key)
@@ -124,11 +122,15 @@ async def upload_file( background_tasks: BackgroundTasks, customInput: str = For
     }
     save_metadata(metadata)
 
+    if not os.path.isfile(file_path):
+        print(f"❌ File not found: {file_path}")
+        return JSONResponse(content={"status":0,"message":"File Upload Failed ","data":[]},status_code=200)
+
     print("Before adding background task")
     background_tasks.add_task(process_file, file_location, json_file_name, unique_id, customInput)
     print("After adding background task")
 
-    return RedirectResponse(url=f"""metadata/{unique_id}""",status_code=302)
+    return JSONResponse(content={"status":1,'message': 'File uploaded successfully', 'metadata': metadata}, status_code=200)
 
 @app.get("/metadata/{uuid}")
 async def get_status(uuid: str):
